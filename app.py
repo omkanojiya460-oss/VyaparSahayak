@@ -2,23 +2,21 @@ import os
 from flask import Flask, request, jsonify
 from groq import Groq
 
-
+app = Flask(__name__)
 client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 
-app = Flask(__name__)
-
-SYSTEM_PROMPT = """
-Tu ek smart business assistant hai jiska naam Vyapar Sahayak hai.
+SYSTEM_PROMPT = """Tu ek smart business assistant hai jiska naam Vyapar Sahayak hai.
 Tu Indian small business owners ki madad karta hai Hindi aur Hinglish mein.
-Tu sale record karta hai, stock track karta hai, aur invoice banata hai.
-Short aur clear jawab do WhatsApp style mein. Emojis use karo.
-"""
+Short aur clear jawab do. Emojis use karo."""
+
+@app.route("/", methods=["GET"])
+def home():
+    return jsonify({"status": "Vyapar Sahayak chal raha hai!"})
 
 @app.route("/chat", methods=["POST"])
 def chat():
     data = request.get_json()
     user_message = data.get("message", "")
-    
     response = client.chat.completions.create(
         model="llama-3.3-70b-versatile",
         messages=[
@@ -26,12 +24,8 @@ def chat():
             {"role": "user", "content": user_message}
         ]
     )
-    
     return jsonify({"reply": response.choices[0].message.content})
 
-@app.route("/", methods=["GET"])
-def home():
-    return jsonify({"status": "Vyapar Sahayak chal raha hai!"})
-
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
