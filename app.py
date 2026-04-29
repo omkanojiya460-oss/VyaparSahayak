@@ -2,8 +2,8 @@ import os
 from flask import Flask, request, jsonify
 from groq import Groq
 
-api_key = open(".env").read().strip().replace("GROQ_API_KEY=", "")
-client = Groq(api_key="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")
+
+client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 
 app = Flask(__name__)
 
