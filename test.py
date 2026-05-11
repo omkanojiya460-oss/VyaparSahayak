@@ -1,7 +1,7 @@
 import requests
 
 response = requests.post(
-    "http://127.0.0.1:5000/chat",
+    "https://vyaparsahayak.onrender.com/chat",
     json={"message": "50 kg aata becha 35 rupaye kilo Ramesh ko"}
 )
 
