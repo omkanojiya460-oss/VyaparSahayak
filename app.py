@@ -16,6 +16,7 @@ Short aur clear jawab do. Emojis use karo."""
 def send_wati_message(phone, message):
     url = f"{WATI_API_URL}/api/v1/sendSessionMessage/{phone}"
     headers = {"Authorization": WATI_API_KEY}
+    message.replace("**", "").replace("*", "").replace("#", "")
     print(f"Sending to {phone}: {message}")
     data = {"messageText": str(message)}
     try:
