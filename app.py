@@ -48,19 +48,28 @@ def webhook():
     
     return jsonify({"status": "ok"})
 
-@app.route("/chat", methods=["POST"])
-def chat():
+@app.route("/webhook", methods=["POST"])
+def webhook():
     data = request.get_json()
-    user_message = data.get("message", "")
-    response = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
-        messages=[
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": user_message}
-        ]
-    )
-    return jsonify({"reply": response.choices[0].message.content})
-
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+    print("Webhook data:", data)  # Debug ke liye
+    
+    try:
+        # Wati ka format
+        if data:
+            user_message = data.get("text", "") or data.get("message", "")
+            phone = data.get("waId", "") or data.get("phone", "")
+            
+            if user_message and phone:
+                response = client.chat.completions.create(
+                    model="llama-3.3-70b-versatile",
+                    messages=[
+                        {"role": "system", "content": SYSTEM_PROMPT},
+                        {"role": "user", "content": user_message}
+                    ]
+                )
+                ai_reply = response.choices[0].message.content
+                send_wati_message(phone, ai_reply)
+    except Exception as e:
+        print("Error:", e)
+    
+    return jsonify({"status": "ok"})
