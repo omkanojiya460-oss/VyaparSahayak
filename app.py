@@ -17,7 +17,10 @@ def send_wati_message(phone, message):
     url = f"{WATI_API_URL}/api/v1/sendSessionMessage/{phone}"
     headers = {"Authorization": f"Bearer {WATI_API_KEY}"}
     data = {"messageText": message}
-    requests.post(url, headers=headers, json=data)
+    try:
+        requests.post(url, headers=headers, json=data)
+    except Exception as e:
+        print("Send error:", e)
 
 @app.route("/", methods=["GET"])
 def home():
@@ -26,39 +29,11 @@ def home():
 @app.route("/webhook", methods=["POST"])
 def webhook():
     data = request.get_json()
-    
-    # Wati se message aaya
-    if data and "text" in data and "waId" in data:
-        user_message = data["text"].get("body", "")
-        phone = data["waId"]
-        
-        if user_message:
-            # AI se jawab lo
-            response = client.chat.completions.create(
-                model="llama-3.3-70b-versatile",
-                messages=[
-                    {"role": "system", "content": SYSTEM_PROMPT},
-                    {"role": "user", "content": user_message}
-                ]
-            )
-            ai_reply = response.choices[0].message.content
-            
-            # WhatsApp pe bhejo
-            send_wati_message(phone, ai_reply)
-    
-    return jsonify({"status": "ok"})
-
-@app.route("/webhook", methods=["POST"])
-def webhook():
-    data = request.get_json()
-    print("Webhook data:", data)  # Debug ke liye
-    
+    print("Webhook data:", data)
     try:
-        # Wati ka format
         if data:
             user_message = data.get("text", "") or data.get("message", "")
             phone = data.get("waId", "") or data.get("phone", "")
-            
             if user_message and phone:
                 response = client.chat.completions.create(
                     model="llama-3.3-70b-versatile",
@@ -71,5 +46,21 @@ def webhook():
                 send_wati_message(phone, ai_reply)
     except Exception as e:
         print("Error:", e)
-    
     return jsonify({"status": "ok"})
+
+@app.route("/chat", methods=["POST"])
+def chat():
+    data = request.get_json()
+    user_message = data.get("message", "")
+    response = client.chat.completions.create(
+        model="llama-3.3-70b-versatile",
+        messages=[
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": user_message}
+        ]
+    )
+    return jsonify({"reply": response.choices[0].message.content})
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
