@@ -16,7 +16,8 @@ Short aur clear jawab do. Emojis use karo."""
 def send_wati_message(phone, message):
     url = f"{WATI_API_URL}/api/v1/sendSessionMessage/{phone}"
     headers = {"Authorization": WATI_API_KEY}
-    data = {"messageText": message}
+    print(f"Sending to {phone}: {message}")
+    data = {"messageText": str(message)}
     try:
         r = requests.post(url, headers=headers, json=data)
         print("Wati response:", r.text)
