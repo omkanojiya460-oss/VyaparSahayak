@@ -18,7 +18,8 @@ def send_wati_message(phone, message):
     headers = {"Authorization": f"Bearer {WATI_API_KEY}"}
     data = {"messageText": message}
     try:
-        requests.post(url, headers=headers, json=data)
+        r = requests.post(url, headers=headers, json=data)
+        print("Wati response:", r.text)
     except Exception as e:
         print("Send error:", e)
 
@@ -29,11 +30,18 @@ def home():
 @app.route("/webhook", methods=["POST"])
 def webhook():
     data = request.get_json()
-    print("Webhook data:", data)
     try:
         if data:
-            user_message = data.get("text", "") or data.get("message", "")
-            phone = data.get("waId", "") or data.get("phone", "")
+            # Wati text field extract karo
+            text_field = data.get("text", "")
+            if isinstance(text_field, dict):
+                user_message = text_field.get("body", "")
+            else:
+                user_message = str(text_field) if text_field else ""
+            
+            phone = data.get("waId", "")
+            print(f"Message: {user_message}, Phone: {phone}")
+            
             if user_message and phone:
                 response = client.chat.completions.create(
                     model="llama-3.3-70b-versatile",
@@ -43,6 +51,7 @@ def webhook():
                     ]
                 )
                 ai_reply = response.choices[0].message.content
+                print(f"AI Reply: {ai_reply}")
                 send_wati_message(phone, ai_reply)
     except Exception as e:
         print("Error:", e)
