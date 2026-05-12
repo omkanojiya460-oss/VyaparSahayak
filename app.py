@@ -15,13 +15,22 @@ Short aur clear jawab do. Emojis use karo."""
 
 def send_wati_message(phone, message):
     url = f"{WATI_API_URL}/api/v1/sendSessionMessage/{phone}"
-    headers = {"Authorization": WATI_API_KEY}
-    message.replace("**", "").replace("*", "").replace("#", "")
-    print(f"Sending to {phone}: {message}")
-    data = {"messageText": str(message)}
+    headers = {
+        "Authorization": WATI_API_KEY,
+        "Content-Type": "application/json"
+    }
+    message = (message or "").replace("**", "").replace("*", "").replace("#", "").strip()
+    if not message:
+        print(f"Skipping Wati send to {phone}: message text is empty")
+        return
+
+    payload = {"messageText": message}
+    print(f"Sending to {phone}: [{message}]")
+    print(f"URL: {url}")
     try:
-        r = requests.post(url, headers=headers, json=data)
+        r = requests.post(url, headers=headers, json=payload)
         print("Wati response:", r.text)
+        print("Status code:", r.status_code)
     except Exception as e:
         print("Send error:", e)
 
