@@ -24,11 +24,10 @@ def send_wati_message(phone, message):
         print(f"Skipping Wati send to {phone}: message text is empty")
         return
 
-    payload = {"messageText": message}
     print(f"Sending to {phone}: [{message}]")
     print(f"URL: {url}")
     try:
-        r = requests.post(url, headers=headers, json=payload)
+        r = requests.post(url, headers=headers, params={"messageText": message})
         print("Wati response:", r.text)
         print("Status code:", r.status_code)
     except Exception as e:
