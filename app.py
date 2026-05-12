@@ -58,13 +58,20 @@ def get_stock(phone, item):
 def send_wati_message(phone, message):
     url = f"{WATI_API_URL}/api/v1/sendSessionMessage/{phone}"
     headers = {"Authorization": WATI_API_KEY}
-    message = message.replace("**", "").replace("*", "").replace("#", "").strip()
-    data = {"messageText": str(message)}
+    message = (message or "").replace("**", "").replace("*", "").replace("#", "").strip()
+    if not message:
+        print(f"Skipping Wati send to {phone}: message text is empty", flush=True)
+        return
+
+    params = {"messageText": message}
+    print(f"Sending to {phone}: [{message}]", flush=True)
+    print(f"URL: {url}", flush=True)
     try:
-        r = requests.post(url, headers=headers, json=data)
-        print("Wati response:", r.text)
+        r = requests.post(url, headers=headers, params=params)
+        print("Wati response:", r.text, flush=True)
+        print("Status code:", r.status_code, flush=True)
     except Exception as e:
-        print("Send error:", e)
+        print("Send error:", e, flush=True)
 
 @app.route("/", methods=["GET"])
 def home():
@@ -81,6 +88,7 @@ def webhook():
             else:
                 user_message = str(text_field) if text_field else ""
             phone = data.get("waId", "")
+            print(f"Message: {user_message}, Phone: {phone}", flush=True)
             
             if user_message and phone:
                 # Stock context
@@ -101,6 +109,7 @@ def webhook():
                     ]
                 )
                 ai_reply = response.choices[0].message.content
+                print(f"AI Reply: {ai_reply}", flush=True)
                 
                 # Transaction save karo
                 try:
