@@ -1,5 +1,5 @@
 import os
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from groq import Groq
 import requests
 from supabase import create_client
@@ -89,7 +89,7 @@ def send_wati_message(phone, message):
 
 @app.route("/", methods=["GET"])
 def home():
-    return jsonify({"status": "Vyapar Sahayak chal raha hai!"})
+    return render_template("index.html")
 
 @app.route("/webhook", methods=["POST"])
 def webhook():
