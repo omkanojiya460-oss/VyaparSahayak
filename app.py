@@ -1,22 +1,36 @@
 import os
-from flask import Flask, request, jsonify, render_template, session, redirect, url_for
+from flask import Flask, request, jsonify, render_template, session, redirect
 from functools import wraps
-from groq import Groq
 import requests
-from supabase import create_client
+
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
+try:
+    from groq import Groq
+except ImportError:
+    Groq = None
+
+try:
+    from supabase import create_client
+except ImportError:
+    create_client = None
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "vyapar-secret-123")
 
-client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
+GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
+client = Groq(api_key=GROQ_API_KEY) if Groq and GROQ_API_KEY else None
 
 WATI_API_KEY = os.environ.get("WATI_API_KEY", "")
 WATI_API_URL = os.environ.get("WATI_API_URL", "")
 
-supabase = create_client(
-    os.environ.get("SUPABASE_URL"),
-    os.environ.get("SUPABASE_KEY")
-)
+SUPABASE_URL = os.environ.get("SUPABASE_URL")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
+supabase = create_client(SUPABASE_URL, SUPABASE_KEY) if create_client and SUPABASE_URL and SUPABASE_KEY else None
 
 SYSTEM_PROMPT = """Tu Vyapar Sahayak hai — Indian dukandars ka WhatsApp AI assistant.
 
@@ -49,6 +63,14 @@ def login_required(f):
             return redirect('/login')
         return f(*args, **kwargs)
     return decorated
+
+def auth_not_configured_response():
+    if supabase:
+        return None
+    return jsonify({
+        "success": False,
+        "error": "Supabase config missing. Set SUPABASE_URL and SUPABASE_KEY."
+    }), 500
 
 def save_transaction(phone, item, qty, price, type_, customer=""):
     total = float(qty) * float(price)
@@ -92,36 +114,30 @@ def login_page():
 
 @app.route("/auth/signup", methods=["POST"])
 def signup():
-    data = request.get_json()
-    email = data.get("email")
-    password = data.get("password")
-    name = data.get("name")
-    try:
-        res = supabase.auth.sign_up({"email": email, "password": password})
-        if res.user:
-            supabase.table("businesses").insert({
-                "phone": res.user.id,
-                "name": name
-            }).execute()
-            return jsonify({"success": True})
-        return jsonify({"success": False, "error": "Signup fail ho gaya!"})
-    except Exception as e:
-        return jsonify({"success": False, "error": str(e)})
+    return jsonify({"success": False, "error": "Signup is disabled."}), 403
 
 @app.route("/auth/login", methods=["POST"])
 def login():
-    data = request.get_json()
-    email = data.get("email")
-    password = data.get("password")
+    config_error = auth_not_configured_response()
+    if config_error:
+        return config_error
+
+    data = request.get_json(silent=True) or {}
+    email = (data.get("email") or "").strip().lower()
+    password = data.get("password") or ""
+
+    if not email or not password:
+        return jsonify({"success": False, "error": "Email and password are required."}), 400
+
     try:
         res = supabase.auth.sign_in_with_password({"email": email, "password": password})
         if res.user:
             session['user_id'] = res.user.id
             session['user_email'] = res.user.email
-            return jsonify({"success": True})
-        return jsonify({"success": False, "error": "Login fail ho gaya!"})
+            return jsonify({"success": True, "redirect": "/"})
+        return jsonify({"success": False, "error": "Login failed. Please try again."}), 401
     except Exception as e:
-        return jsonify({"success": False, "error": "Email ya password galat hai!"})
+        return jsonify({"success": False, "error": "Email or password is incorrect."}), 401
 
 @app.route("/auth/logout")
 def logout():
@@ -132,7 +148,12 @@ def logout():
 @app.route("/", methods=["GET"])
 @login_required
 def home():
-    return render_template("index.html")
+    return render_template("index.html", user_email=session.get("user_email", "User"))
+
+@app.route("/dashboard", methods=["GET"])
+@login_required
+def dashboard():
+    return redirect("/")
 
 @app.route("/chat", methods=["POST"])
 @login_required
@@ -140,6 +161,10 @@ def chat():
     data = request.get_json()
     user_message = data.get("message", "")
     user_id = session.get('user_id')
+
+    if not client:
+        return jsonify({"reply": "Groq API config missing. Set GROQ_API_KEY and install groq package."}), 500
+
     stock_context = ""
     txn_context = ""
     try:
@@ -176,6 +201,8 @@ def chat():
 def webhook():
     data = request.get_json()
     try:
+        if not client:
+            return jsonify({"status": "error", "error": "Groq API config missing"}), 500
         if data:
             text_field = data.get("text", "")
             if isinstance(text_field, dict):

@@ -151,6 +151,8 @@ body {
   border-radius: var(--radius-sm);
   cursor: pointer;
   transition: background 0.15s;
+  color: inherit;
+  text-decoration: none;
 }
 
 .user-card:hover { background: rgba(255,255,255,0.06); }
@@ -577,6 +579,9 @@ body {
     <div class="nav-section">Settings</div>
     <a class="nav-item" href="#">
       <span class="icon">⚙️</span> Settings
+    </a>
+    <a class="nav-item" href="/auth/logout">
+      <span class="icon">↪</span> Logout
     </a>
   </nav>
 
