@@ -1,7 +1,10 @@
 import os
 from flask import Flask, request, jsonify, render_template, redirect
 import requests
-
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import A4
+from flask import send_file
+import io
 try:
     from dotenv import load_dotenv
     load_dotenv()
@@ -166,7 +169,83 @@ def webhook():
     except Exception as e:
         print("Error:", e)
     return jsonify({"status": "ok"})
-
+@app.route("/invoice", methods=["POST"])
+def generate_invoice():
+    from datetime import datetime
+    data = request.get_json()
+    customer = data.get("customer", "Customer")
+    items = data.get("items", [])
+    business = data.get("business", "Meri Dukaan")
+    
+    buffer = io.BytesIO()
+    c = canvas.Canvas(buffer, pagesize=A4)
+    width, height = A4
+    
+    c.setFillColorRGB(0.91, 0.31, 0.04)
+    c.rect(0, height-80, width, 80, fill=True, stroke=False)
+    c.setFillColorRGB(1, 1, 1)
+    c.setFont("Helvetica-Bold", 22)
+    c.drawString(40, height-45, "TAX INVOICE")
+    c.setFont("Helvetica", 12)
+    c.drawString(40, height-65, business)
+    
+    c.setFillColorRGB(0, 0, 0)
+    c.setFont("Helvetica", 10)
+    c.drawString(40, height-110, f"Customer: {customer}")
+    c.drawString(40, height-125, f"Date: {datetime.now().strftime('%d/%m/%Y')}")
+    c.drawString(40, height-140, f"Invoice No: INV{datetime.now().strftime('%Y%m%d%H%M')}")
+    
+    c.setFillColorRGB(0.95, 0.95, 0.95)
+    c.rect(40, height-175, width-80, 25, fill=True, stroke=False)
+    c.setFillColorRGB(0, 0, 0)
+    c.setFont("Helvetica-Bold", 10)
+    c.drawString(50, height-163, "Item")
+    c.drawString(250, height-163, "Qty")
+    c.drawString(330, height-163, "Rate")
+    c.drawString(420, height-163, "Amount")
+    
+    y = height - 195
+    total = 0
+    c.setFont("Helvetica", 10)
+    for item in items:
+        name = item.get("name", "")
+        qty = float(item.get("qty", 0))
+        price = float(item.get("price", 0))
+        amount = qty * price
+        total += amount
+        c.drawString(50, y, str(name))
+        c.drawString(250, y, str(qty))
+        c.drawString(330, y, f"Rs.{price}")
+        c.drawString(420, y, f"Rs.{amount:.2f}")
+        c.line(40, y-5, width-40, y-5)
+        y -= 25
+    
+    gst = total * 0.05
+    grand_total = total + gst
+    c.setFont("Helvetica-Bold", 11)
+    c.drawString(330, y-10, "Subtotal:")
+    c.drawString(420, y-10, f"Rs.{total:.2f}")
+    c.drawString(330, y-30, "GST (5%):")
+    c.drawString(420, y-30, f"Rs.{gst:.2f}")
+    c.setFillColorRGB(0.91, 0.31, 0.04)
+    c.rect(310, y-60, width-350, 22, fill=True, stroke=False)
+    c.setFillColorRGB(1, 1, 1)
+    c.drawString(330, y-50, "TOTAL:")
+    c.drawString(420, y-50, f"Rs.{grand_total:.2f}")
+    
+    c.setFillColorRGB(0.5, 0.5, 0.5)
+    c.setFont("Helvetica", 9)
+    c.drawCentredString(width/2, 40, "Thank you! | Vyapar Sahayak")
+    
+    c.save()
+    buffer.seek(0)
+    
+    return send_file(
+        buffer,
+        as_attachment=True,
+        download_name=f"invoice_{customer}.pdf",
+        mimetype="application/pdf"
+    )
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
