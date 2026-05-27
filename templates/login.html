@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vyapar Sahayak — Login</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Sora:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background: #0F1923;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 100vh;
+  width: 100%;
+}
+
+.left {
+  background: linear-gradient(135deg, #0F1923 0%, #1A2E3B 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 60px;
+  position: relative;
+  overflow: hidden;
+}
+
+.left::before {
+  content: '';
+  position: absolute;
+  top: -100px; right: -100px;
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(232,80,10,0.15) 0%, transparent 70%);
+}
+
+.left::after {
+  content: '';
+  position: absolute;
+  bottom: -100px; left: -100px;
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, rgba(10,122,62,0.1) 0%, transparent 70%);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 60px;
+}
+
+.brand-icon {
+  width: 44px; height: 44px;
+  background: linear-gradient(135deg, #E8500A, #FF6B2B);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+}
+
+.brand-name {
+  font-family: 'Sora', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: white;
+}
+
+.hero-title {
+  font-family: 'Sora', sans-serif;
+  font-size: 42px;
+  font-weight: 700;
+  color: white;
+  line-height: 1.2;
+  margin-bottom: 20px;
+}
+
+.hero-title span { color: #E8500A; }
+
+.hero-desc {
+  font-size: 16px;
+  color: rgba(255,255,255,0.5);
+  line-height: 1.7;
+  margin-bottom: 48px;
+  max-width: 400px;
+}
+
+.features {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.feature {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: rgba(255,255,255,0.7);
+  font-size: 14px;
+}
+
+.feature-icon {
+  width: 36px; height: 36px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.right {
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px;
+}
+
+.login-box {
+  width: 100%;
+  max-width: 400px;
+}
+
+.login-title {
+  font-family: 'Sora', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: #0F1923;
+  margin-bottom: 8px;
+}
+
+.login-sub {
+  font-size: 14px;
+  color: #7A8F9E;
+  margin-bottom: 36px;
+}
+
+.tabs {
+  display: flex;
+  background: #F7F9FC;
+  border-radius: 10px;
+  padding: 4px;
+  margin-bottom: 28px;
+}
+
+.tab {
+  flex: 1;
+  padding: 9px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: #7A8F9E;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tab.active {
+  background: white;
+  color: #0F1923;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.08);
+}
+
+.form-group { margin-bottom: 18px; }
+
+.form-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #3D4F5C;
+  margin-bottom: 7px;
+}
+
+.form-input {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1.5px solid #E4ECF2;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 14px;
+  color: #0F1923;
+  background: #F7F9FC;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.form-input:focus {
+  border-color: #E8500A;
+  background: white;
+}
+
+.form-input::placeholder { color: #B0BEC5; }
+
+.submit-btn {
+  width: 100%;
+  padding: 13px;
+  background: linear-gradient(135deg, #E8500A, #FF6B2B);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: opacity 0.15s, transform 0.15s;
+}
+
+.submit-btn:hover { opacity: 0.92; transform: translateY(-1px); }
+.submit-btn:active { transform: translateY(0); }
+
+.error-msg {
+  background: #FFECEC;
+  color: #D02020;
+  font-size: 13px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  display: none;
+}
+
+.success-msg {
+  background: #EDFAF4;
+  color: #0A7A3E;
+  font-size: 13px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  display: none;
+}
+
+.divider {
+  text-align: center;
+  font-size: 12px;
+  color: #B0BEC5;
+  margin: 20px 0;
+  position: relative;
+}
+
+.divider::before, .divider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 42%;
+  height: 1px;
+  background: #E4ECF2;
+}
+
+.divider::before { left: 0; }
+.divider::after { right: 0; }
+
+@media (max-width: 768px) {
+  .container { grid-template-columns: 1fr; }
+  .left { display: none; }
+  .right { padding: 30px 20px; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Left Side -->
+  <div class="left">
+    <div class="brand">
+      <div class="brand-icon">🏪</div>
+      <span class="brand-name">VyaparSahayak</span>
+    </div>
+
+    <h1 class="hero-title">
+      Apna Business<br>
+      <span>AI se Manage</span><br>
+      Karein!
+    </h1>
+
+    <p class="hero-desc">
+      Hindi mein baat karein, sales record karein, stock track karein aur invoices banayein — sab ek jagah!
+    </p>
+
+    <div class="features">
+      <div class="feature">
+        <div class="feature-icon">💬</div>
+        Hindi/Hinglish mein AI se baat karein
+      </div>
+      <div class="feature">
+        <div class="feature-icon">📦</div>
+        Stock automatically track hoga
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🧾</div>
+        GST Invoice ek click mein
+      </div>
+      <div class="feature">
+        <div class="feature-icon">📊</div>
+        Daily sales report ready
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Side -->
+  <div class="right">
+    <div class="login-box">
+      <h2 class="login-title">Welcome Back! 👋</h2>
+      <p class="login-sub">Apne account mein login karein</p>
+
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab('login')">Login</button>
+        <button class="tab" onclick="switchTab('signup')">Sign Up</button>
+      </div>
+
+      <div id="error-msg" class="error-msg"></div>
+      <div id="success-msg" class="success-msg"></div>
+
+      <!-- Login Form -->
+      <div id="login-form">
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" class="form-input" id="login-email" placeholder="aapki@email.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" class="form-input" id="login-password" placeholder="••••••••">
+        </div>
+        <button class="submit-btn" onclick="login()">Login karein →</button>
+      </div>
+
+      <!-- Signup Form -->
+      <div id="signup-form" style="display:none">
+        <div class="form-group">
+          <label class="form-label">Dukaan ka Naam</label>
+          <input type="text" class="form-input" id="signup-name" placeholder="Shree Ram Kirana Store">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" class="form-input" id="signup-email" placeholder="aapki@email.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" class="form-input" id="signup-password" placeholder="Min 6 characters">
+        </div>
+        <button class="submit-btn" onclick="signup()">Account Banayein →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = '{{supabase_url}}';
+const SUPABASE_KEY = '{{supabase_key}}';
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('login-form').style.display = tab === 'login' ? 'block' : 'none';
+  document.getElementById('signup-form').style.display = tab === 'signup' ? 'block' : 'none';
+  hideMessages();
+}
+
+function showError(msg) {
+  const el = document.getElementById('error-msg');
+  el.textContent = msg;
+  el.style.display = 'block';
+  document.getElementById('success-msg').style.display = 'none';
+}
+
+function showSuccess(msg) {
+  const el = document.getElementById('success-msg');
+  el.textContent = msg;
+  el.style.display = 'block';
+  document.getElementById('error-msg').style.display = 'none';
+}
+
+function hideMessages() {
+  document.getElementById('error-msg').style.display = 'none';
+  document.getElementById('success-msg').style.display = 'none';
+}
+
+async function login() {
+  const email = document.getElementById('login-email').value;
+  const password = document.getElementById('login-password').value;
+
+  if (!email || !password) { showError('Email aur password daalen!'); return; }
+
+  const res = await fetch('/auth/login', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({email, password})
+  });
+
+  const data = await res.json();
+  if (data.success) {
+    window.location.href = '/dashboard';
+  } else {
+    showError(data.error || 'Login fail ho gaya!');
+  }
+}
+
+async function signup() {
+  const name = document.getElementById('signup-name').value;
+  const email = document.getElementById('signup-email').value;
+  const password = document.getElementById('signup-password').value;
+
+  if (!name || !email || !password) { showError('Sab fields bharein!'); return; }
+  if (password.length < 6) { showError('Password kam se kam 6 characters ka hona chahiye!'); return; }
+
+  const res = await fetch('/auth/signup', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({name, email, password})
+  });
+
+  const data = await res.json();
+  if (data.success) {
+    showSuccess('Account ban gaya! Ab login karein.');
+    switchTab('login');
+  } else {
+    showError(data.error || 'Signup fail ho gaya!');
+  }
+}
+</script>
+</body>
+</html>
