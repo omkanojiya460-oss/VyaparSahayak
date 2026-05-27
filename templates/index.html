@@ -928,19 +928,27 @@ function quickSend(msg) {
 
 function clearChat() {
 async function downloadInvoice() {
+  const salesItems = recentTxns.filter(t => t.type === 'sale').map(t => ({
+    name: t.item,
+    qty: t.qty,
+    price: t.price
+  }));
+
+  if (salesItems.length === 0) {
+    addMessage('Pehle koi sale record karein, phir invoice download karein!', 'bot');
+    return;
+  }
+
   const res = await fetch('/invoice', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({
-      customer: "Customer",
+      customer: recentTxns[0]?.customer || "Customer",
       business: "Meri Dukaan",
-      items: recentTxns.filter(t => t.type === 'sale').map(t => ({
-        name: t.item,
-        qty: t.qty,
-        price: t.price
-      }))
+      items: salesItems
     })
   });
+
   const blob = await res.blob();
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
