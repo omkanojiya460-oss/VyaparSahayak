@@ -151,8 +151,6 @@ body {
   border-radius: var(--radius-sm);
   cursor: pointer;
   transition: background 0.15s;
-  color: inherit;
-  text-decoration: none;
 }
 
 .user-card:hover { background: rgba(255,255,255,0.06); }
@@ -634,7 +632,6 @@ body {
         <button class="quick-btn" onclick="quickSend('aata kitna bacha hai')">🔍 Stock Check</button>
         <button class="quick-btn" onclick="quickSend('aaj ki report do')">📊 Aaj ki Report</button>
         <button class="quick-btn" onclick="quickSend('Ramesh ka invoice banao')">🧾 Invoice</button>
-        <button class="quick-btn" onclick="downloadInvoice()">📄 Invoice Download</button>
       </div>
 
       <!-- Input -->
@@ -934,9 +931,7 @@ function clearChat() {
 
 async function downloadInvoice() {
   const salesItems = recentTxns.filter(t => t.type === 'sale').map(t => ({
-    name: t.item,
-    qty: t.qty,
-    price: t.price
+    name: t.item, qty: t.qty, price: t.price
   }));
   if (salesItems.length === 0) {
     addMessage('Pehle koi sale record karein!', 'bot');
@@ -957,10 +952,6 @@ async function downloadInvoice() {
   a.href = url;
   a.download = 'invoice.pdf';
   a.click();
-}
-  const container = document.getElementById('chatMessages');
-  container.innerHTML = '';
-  addMessage('Namaste! 🙏 Naya chat shuru ho gaya. Kya madad chahiye?', 'bot');
 }
 </script>
 </body>
