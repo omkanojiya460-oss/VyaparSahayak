@@ -931,9 +931,10 @@ function clearChat() {
 }
 
 async function downloadInvoice() {
-  const salesItems = recentTxns.filter(t => t.type === 'sale').map(t => ({
-    name: t.item, qty: t.qty, price: t.price
-  }));
+ const lastCustomer = recentTxns.find(t => t.type === 'sale')?.customer || "Customer";
+const salesItems = recentTxns
+  .filter(t => t.type === 'sale' && t.customer === lastCustomer)
+  .map(t => ({ name: t.item, qty: t.qty, price: t.price }));
   if (salesItems.length === 0) {
     addMessage('Pehle koi sale record karein!', 'bot');
     return;
