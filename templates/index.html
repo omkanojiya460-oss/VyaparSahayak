@@ -927,18 +927,21 @@ function quickSend(msg) {
 }
 
 function clearChat() {
+  const container = document.getElementById('chatMessages');
+  container.innerHTML = '';
+  addMessage('Namaste! 🙏 Naya chat shuru ho gaya. Kya madad chahiye?', 'bot');
+}
+
 async function downloadInvoice() {
   const salesItems = recentTxns.filter(t => t.type === 'sale').map(t => ({
     name: t.item,
     qty: t.qty,
     price: t.price
   }));
-
   if (salesItems.length === 0) {
-    addMessage('Pehle koi sale record karein, phir invoice download karein!', 'bot');
+    addMessage('Pehle koi sale record karein!', 'bot');
     return;
   }
-
   const res = await fetch('/invoice', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
@@ -948,7 +951,6 @@ async function downloadInvoice() {
       items: salesItems
     })
   });
-
   const blob = await res.blob();
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
